@@ -1,3 +1,4 @@
+#include "cudd.h"
 #include <cudd-sandbox/cudd-sandbox.hpp>
 
 #include <flags.h>
@@ -18,8 +19,9 @@ int main(int argc, char **argv) {
             return 1;
         }
         fmt::print("reordering {:s} into {:s}\n", *in_path, *out_path);
-        const auto ok = reorder_dddmp_file(*in_path, *out_path);
-        fmt::print("result: {:s}\n", ok ? "OK" : "BAD");
+        DdManager *mgr        = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+        const int reorder_res = reorder_dddmp_file(mgr, *in_path, *out_path);
+        fmt::print("result: {}\n", reorder_res);
     }
     return 0;
 }

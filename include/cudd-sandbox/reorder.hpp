@@ -1,5 +1,7 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 
-bool reorder_dddmp_file(const std::string_view &in, const std::string_view &out_path);
+#include <cudd.h>
+
+int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::string &out_path);
