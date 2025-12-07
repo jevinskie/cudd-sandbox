@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 4.1)
 
-project(clang-unformat-ng C CXX)
-
-option(UNFMTNG_DISABLE_LLVM "Stub out LLVM functionality to make a build that is ammenable for -fsanitize." OFF)
+project(cudd-sandbox C CXX)
 
 option(FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." ON)
 
@@ -17,15 +15,15 @@ if (${FORCE_COLORED_OUTPUT})
     endif ()
 endif ()
 
-set(UNFMTNG_MAIN_SRC_DIR       ${CMAKE_CURRENT_SOURCE_DIR}    )
-set(UNFMTNG_MAIN_INCLUDE_DIR   ${UNFMTNG_MAIN_SRC_DIR}/include)
-set(UNFMTNG_BINARY_DIR         ${CMAKE_CURRENT_BINARY_DIR}    )
-set(UNFMTNG_BINARY_INCLUDE_DIR ${UNFMTNG_BINARY_DIR}/include  )
+set(CUDDSBX_MAIN_SRC_DIR       ${CMAKE_CURRENT_SOURCE_DIR}    )
+set(CUDDSBX_MAIN_INCLUDE_DIR   ${CUDDSBX_MAIN_SRC_DIR}/include)
+set(CUDDSBX_BINARY_DIR         ${CMAKE_CURRENT_BINARY_DIR}    )
+set(CUDDSBX_BINARY_INCLUDE_DIR ${CUDDSBX_BINARY_DIR}/include  )
 
 # needed on linux to build exe w/ object library
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(UNFMTNG_WARNING_FLAGS
+set(CUDDSBX_WARNING_FLAGS
     -Wall
     -Wextra
     -Wpedantic
