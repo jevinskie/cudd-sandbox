@@ -33,7 +33,7 @@ set(CUDDSBX_WARNING_FLAGS
     -Werror=return-type
 )
 
-add_compile_options(${JEV_COLOR_DIAGS})
+add_compile_options(${JEV_COLOR_DIAGS} -DDD_DEBUG=1 -DDDDMP_DEBUG=1)
 
 if (APPLE)
     add_compile_options(-fsanitize=address)
