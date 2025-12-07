@@ -4,6 +4,7 @@ set(CUDDSBX_CLI_SRC
 
 set(CUDDSBX_CLI_PRIVATE_LIBS
     cudd-sandbox
+    flags
     fmt::fmt
 )
 

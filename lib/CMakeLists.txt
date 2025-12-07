@@ -40,6 +40,7 @@ endforeach()
 
 set(LIBCUDDSBX_PUBLIC_LIBS
     fmt::fmt
+    cudd
 )
 
 set(LIBCUDDSBX_PRIVATE_LIBS
