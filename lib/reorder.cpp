@@ -22,7 +22,6 @@ int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::st
     Cudd_Ref(b);
     // const auto c = Cudd_bddNewVar(mgr); Cudd_Ref(c);
     // const auto d = Cudd_bddNewVar(mgr); Cudd_Ref(d);
-    // Cudd_Ref(a); Cudd_Ref(b); Cudd_Ref(c); Cudd_Ref(d);
     assert(a);
     assert(b);
     // assert(c);
@@ -68,8 +67,9 @@ int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::st
     fprintf(stderr, "\n\n\n");
     Cudd_PrintInfo(mgr, stderr);
     char dumb_const_qual_workaround[] = "opt";
-    const auto store_res = Dddmp_cuddBddStore(mgr, dumb_const_qual_workaround, res, nullptr, nullptr, DDDMP_MODE_TEXT,
-                                              DDDMP_VARDEFAULT, op.data(), nullptr);
+    const char *varnames[]            = {"a", "b"};
+    const auto store_res = Dddmp_cuddBddStore(mgr, dumb_const_qual_workaround, res, const_cast<char **>(varnames),
+                                              nullptr, DDDMP_MODE_TEXT, DDDMP_VARNAMES, op.data(), nullptr);
     return store_res;
     // Dddmp_cuddBddDisplayBinary(ip.data(), op.data());
     // std::string tmp = op + ".t2b";
