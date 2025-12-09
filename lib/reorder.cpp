@@ -66,10 +66,9 @@ int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::st
 
     fprintf(stderr, "\n\n\n");
     Cudd_PrintInfo(mgr, stderr);
-    char dumb_const_qual_workaround[] = "opt";
-    const char *varnames[]            = {"a", "b"};
-    const auto store_res = Dddmp_cuddBddStore(mgr, dumb_const_qual_workaround, res, const_cast<char **>(varnames),
-                                              nullptr, DDDMP_MODE_TEXT, DDDMP_VARNAMES, op.data(), nullptr);
+    const char *varnames[] = {"a", "b"};
+    const auto store_res   = Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), res, const_cast<char **>(varnames),
+                                                nullptr, DDDMP_MODE_TEXT, DDDMP_VARNAMES, op.data(), nullptr);
     return store_res;
     // Dddmp_cuddBddDisplayBinary(ip.data(), op.data());
     // std::string tmp = op + ".t2b";
