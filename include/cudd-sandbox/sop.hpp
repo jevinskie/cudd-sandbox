@@ -27,9 +27,9 @@ public:
         return _out_sz;
     }
     std::pair<size_t, size_t> sz() const {
-        return std::make_pair(in_sz(), out_sz());
+        return {in_sz(), out_sz()};
     }
-    uint64_t in_bmask() const {
+    constexpr uint64_t in_bmask() const {
         return _in_bmask;
     }
     uint64_t in_bpat() const {
@@ -140,7 +140,7 @@ public:
         return _out_sz;
     }
     std::pair<size_t, size_t> sz() const {
-        return std::make_pair(in_sz(), out_sz());
+        return {in_sz(), out_sz()};
     }
 
 private:
