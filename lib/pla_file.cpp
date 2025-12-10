@@ -1,5 +1,8 @@
 #include <cudd-sandbox/pla_file.hpp>
 
+#include <cudd-sandbox/utils.hpp>
+
+#include <exception>
 #include <optional>
 
 #include <ctre.hpp>
@@ -15,5 +18,10 @@ std::optional<Implicant> extr_implicant(std::string_view s) noexcept {
 
 SOP read_pla_file(const std::string &pla_path) {
     SOP pla;
+    const auto plas = slurp_file_string(pla_path);
+    if (!plas.size()) {
+        fprintf(stderr, "pla file read error\n");
+        std::terminate();
+    }
     return pla;
 }
