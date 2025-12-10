@@ -111,6 +111,22 @@ public:
             fprintf(stderr, "implicants must be positively sized. in sz: %zu out sz: %zu\n", imp.in_sz(), imp.out_sz());
             std::terminate();
         }
+        if (_in_sz == 0) {
+            if (_out_sz != 0) {
+                fprintf(stderr, "_out_sz != 0 when _in_sz == 0. _out_sz: %zu\n", _out_sz);
+                std::terminate();
+            }
+            _in_sz  = imp.in_sz();
+            _out_sz = imp.out_sz();
+        }
+        if (_in_sz != imp.in_sz()) {
+            fprintf(stderr, "New implicant input size is %zu not %zu\n", imp.in_sz(), _in_sz);
+            std::terminate();
+        }
+        if (_out_sz != imp.out_sz()) {
+            fprintf(stderr, "New implicant output size is %zu not %zu\n", imp.out_sz(), _out_sz);
+            std::terminate();
+        }
         _imps.push_back(imp);
     }
     const std::vector<Implicant> &implicants() const {
@@ -128,7 +144,7 @@ public:
     }
 
 private:
-    uint64_t _in_sz  = 0;
-    uint64_t _out_sz = 0;
+    size_t _in_sz  = 0;
+    size_t _out_sz = 0;
     std::vector<Implicant> _imps;
 };
