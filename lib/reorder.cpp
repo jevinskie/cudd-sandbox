@@ -10,12 +10,12 @@ int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::st
     std::string ip = in_path;
     std::string op = out_path;
     Cudd_PrintInfo(mgr, stderr);
-    // DdNode *in_node =
-    //     Dddmp_cuddBddLoad(mgr, DDDMP_VAR_MATCHIDS, nullptr, nullptr, nullptr, DDDMP_MODE_DEFAULT, ip.data(),
-    //     nullptr);
-    // if (!in_node) {
-    //     return -1;
-    // }
+    DdNode *res =
+        Dddmp_cuddBddLoad(mgr, DDDMP_VAR_MATCHIDS, nullptr, nullptr, nullptr, DDDMP_MODE_TEXT, ip.data(), nullptr);
+    if (!res) {
+        return -1;
+    }
+#if 0
     const auto a = Cudd_bddNewVar(mgr);
     Cudd_Ref(a);
     const auto b = Cudd_bddNewVar(mgr);
@@ -75,6 +75,7 @@ int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::st
     // const auto res_3 = Cudd_bddOr(mgr, res_2, c);
     // Cudd_Ref(res_3);
     // const auto res = res_3;
+#endif
 
     assert(res);
     fprintf(stderr, "chk2\n");
