@@ -72,7 +72,7 @@ public:
         return good;
     }
 
-    static uint64_t parse_bmask(std::string_view bs) {
+    static constexpr uint64_t parse_bmask(std::string_view bs) {
         uint64_t bm = 0;
         for (const auto c : bs) {
             bm <<= 1;
@@ -83,7 +83,7 @@ public:
         return bm;
     }
 
-    static uint64_t parse_bpat(std::string_view bs) {
+    static constexpr uint64_t parse_bpat(std::string_view bs) {
         uint64_t bp = 0;
         for (const auto c : bs) {
             bp <<= 1;
