@@ -1,6 +1,7 @@
 set(LIBCUDDSBX_SRC
     pla_file.cpp
     reorder.cpp
+    utils.cpp
 )
 
 set(LIBCUDDSBX_HDR_STANDALONE
