@@ -13,7 +13,7 @@ std::optional<std::string_view> extract_number(std::string_view s) noexcept {
     }
 }
 
-PLA read_pla_file(std::string_view pla_path) {
-    PLA pla;
+SOP read_pla_file(std::string_view pla_path) {
+    SOP pla;
     return pla;
 }

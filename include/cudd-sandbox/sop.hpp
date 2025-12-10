@@ -6,6 +6,7 @@
 #include <exception>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 class Implicant {
 public:
@@ -102,4 +103,32 @@ private:
     uint8_t _out_sz;
 };
 
-struct PLA {};
+class SOP {
+public:
+    SOP() {}
+    void add_implicant(const Implicant &imp) {
+        if (imp.in_sz() == 0 || imp.out_sz() == 0) {
+            fprintf(stderr, "implicants must be positively sized. in sz: %zu out sz: %zu\n", imp.in_sz(), imp.out_sz());
+            std::terminate();
+        }
+        _imps.push_back(imp);
+    }
+    const std::vector<Implicant> &implicants() const {
+        return _imps;
+    }
+
+    size_t in_sz() const {
+        return _in_sz;
+    }
+    size_t out_sz() const {
+        return _out_sz;
+    }
+    std::pair<size_t, size_t> sz() const {
+        return std::make_pair(in_sz(), out_sz());
+    }
+
+private:
+    uint64_t _in_sz  = 0;
+    uint64_t _out_sz = 0;
+    std::vector<Implicant> _imps;
+};
