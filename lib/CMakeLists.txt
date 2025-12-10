@@ -44,7 +44,7 @@ set(LIBCUDDSBX_PUBLIC_LIBS
 )
 
 set(LIBCUDDSBX_PRIVATE_LIBS
-    # etc
+    ctre
 )
 
 # LIBCUDDSBX_HDR added for IDE project generation
