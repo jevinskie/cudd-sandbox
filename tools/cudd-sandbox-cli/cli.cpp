@@ -1,6 +1,6 @@
-#include "cudd.h"
 #include <cudd-sandbox/cudd-sandbox.hpp>
 
+#include <cudd.h>
 #include <flags.h>
 #include <fmt/format.h>
 

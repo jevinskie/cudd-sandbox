@@ -1,9 +1,11 @@
 set(LIBCUDDSBX_SRC
+    pla_file.cpp
     reorder.cpp
 )
 
 set(LIBCUDDSBX_HDR_STANDALONE
     cudd-sandbox.hpp
+    sop.hpp
 )
 
 set(LIBCUDDSBX_HDR_STANDALONE_PRIVATE
@@ -13,9 +15,6 @@ set(LIBCUDDSBX_HDR_STANDALONE_PRIVATE
 set(LIBCUDDSBX_HDR)
 foreach(HDR ${LIBCUDDSBX_HDR_STANDALONE})
     set(RELHDR "${CUDDSBX_MAIN_INCLUDE_DIR}/cudd-sandbox/${HDR}")
-    if(NOT EXISTS ${RELHDR})
-        set(RELHDR "${CMAKE_CURRENT_BINARY_DIR}/${HDR}")
-    endif()
     if(NOT EXISTS ${RELHDR})
         message(STATUS "LIBCUDDSBX_HDR_STANDALONE missing: ${HDR} ${RELHDR}")
     endif()

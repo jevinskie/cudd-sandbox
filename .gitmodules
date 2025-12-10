@@ -7,3 +7,6 @@
 [submodule "3rdparty/flags"]
 	path = 3rdparty/flags
 	url = https://github.com/sailormoon/flags
+[submodule "3rdparty/ctre"]
+	path = 3rdparty/ctre
+	url = https://github.com/hanickadot/compile-time-regular-expressions
