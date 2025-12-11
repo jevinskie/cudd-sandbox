@@ -1,4 +1,3 @@
-#include "cudd-sandbox/pla_file.hpp"
 #include <cudd-sandbox/cudd-sandbox.hpp>
 
 #include <cudd.h>

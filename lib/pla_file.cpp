@@ -6,10 +6,10 @@
 #include <exception>
 #include <optional>
 #include <ranges>
-
-#include <ctre.hpp>
 #include <string>
 #include <string_view>
+
+#include <ctre.hpp>
 
 std::optional<Implicant> extr_implicant(std::string_view s) noexcept {
     if (auto m = ctre::match<R"re(^\s*([01\-]+)\s+([01~]+)\s*$)re">(s)) {
