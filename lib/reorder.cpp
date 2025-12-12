@@ -2,6 +2,7 @@
 #include <cudd-sandbox/reorder.hpp>
 
 #include <cudd-sandbox/pla_file.hpp>
+#include <exception>
 
 #undef NDEBUG
 #include <cassert>
@@ -116,9 +117,16 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     const auto sop = read_pla_file(ip);
     std::vector<std::string> varnames;
     std::vector<const char *> varnames_cstr;
+    std::vector<DdNode *> vars;
     const auto num_in = sop.in_sz();
+    fmt::print("sop # in: {} # out: {} # terms: {}\n", sop.in_sz(), sop.out_sz(), sop.implicants().size());
     for (size_t i = 0; i < num_in; ++i) {
         varnames.push_back(fmt::format("i{}", i));
+        const auto v = Cudd_bddIthVar(mgr, 0);
+        if (!v) {
+            std::terminate();
+        }
+        Cudd_Ref(v);
     }
     for (const auto &vn : varnames) {
         varnames_cstr.push_back(vn.data());
