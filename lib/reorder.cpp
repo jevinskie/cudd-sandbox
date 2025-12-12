@@ -124,6 +124,7 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     const auto zero   = Cudd_ReadLogicZero(mgr);
     Cudd_Ref(one);
     Cudd_Ref(zero);
+    fmt::print("one: {} zero: {}\n", fmt::ptr(one), fmt::ptr(zero));
     fmt::print("sop # in: {} # out: {} # terms: {}\n", sop.in_sz(), sop.out_sz(), sop.implicants().size());
     for (size_t i = 0; i < num_in; ++i) {
         varnames.push_back(fmt::format("i{}", i));
@@ -139,6 +140,7 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
 
     Cudd_DebugCheck(mgr);
     fmt::print(stderr, "BUILDING START\n");
+    int j = 0;
     for (const auto &imp : sop.implicants()) {
         const auto bm    = imp.in_bmask();
         const auto bp    = imp.in_bpat();
@@ -149,14 +151,17 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
                 continue;
             }
             const auto ibp = !!((bp >> i) & 1);
-            DdNode *tmp    = Cudd_bddIte(mgr, ibp ? vars[i] : Cudd_Not(vars[i]), imp_node, zero);
+            DdNode *tmp =
+                Cudd_bddIte(mgr, ibp ? Cudd_bddIthVar(mgr, i) : Cudd_Not(Cudd_bddIthVar(mgr, i)), imp_node, zero);
             Cudd_Ref(tmp);
+            fmt::print("i: {} j: {} tmp: {} imp_node: {}\n", i, j, fmt::ptr(tmp), fmt::ptr(imp_node));
             Cudd_RecursiveDeref(mgr, imp_node);
             imp_node = tmp;
             fmt::print(stderr, "BUILDING CHK B\n");
             Cudd_DebugCheck(mgr);
         }
         imps.push_back(imp_node);
+        ++j;
     }
     fmt::print(stderr, "OUT CHK a\n");
     Cudd_DebugCheck(mgr);
