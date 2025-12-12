@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         fmt::print("reordering {:s} into {:s}\n", *in_path, *out_path);
-        DdManager *mgr         = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+        DdManager *mgr         = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS * 128, CUDD_CACHE_SLOTS, 0);
         const auto reorder_res = reorder_dddmp_file(mgr, *in_path, *out_path);
         fmt::print("result: {}\n", reorder_res);
         Cudd_Quit(mgr);
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         fmt::print("pla reading {:s} into {:s}\n", *in_path, *out_path);
-        DdManager *mgr         = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+        DdManager *mgr         = Cudd_Init(32, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
         const auto sop_pla_res = import_sop_pla(mgr, *in_path, *out_path);
         fmt::print("import_sop_pla returned: {}\n", sop_pla_res);
         Cudd_Quit(mgr);

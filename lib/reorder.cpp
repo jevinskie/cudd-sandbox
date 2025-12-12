@@ -168,6 +168,11 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
         out_node = tmp;
     }
 
+    const auto reduce_res = Cudd_ReduceHeap(mgr, CUDD_REORDER_SIFT, 0);
+    fmt::print("reduce_res: {}\n", reduce_res);
+    // const auto reduce_res2 = Cudd_ReduceHeap(mgr, CUDD_REORDER_EXACT, 4);
+    // fmt::print("reduce_res2: {}\n", reduce_res2);
+
     Cudd_PrintInfo(mgr, stderr);
     const auto store_res =
         Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), out_node, const_cast<char **>(varnames_cstr.data()), nullptr,
