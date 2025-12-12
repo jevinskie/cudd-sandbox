@@ -46,7 +46,9 @@ int import_sop_pla(const std::string &in_path, const std::string &out_path) {
     std::vector<DdNode *> imps;
     const auto num_in = sop.in_sz();
     fmt::print("sop # in: {} # out: {} # terms: {}\n", sop.in_sz(), sop.out_sz(), sop.implicants().size());
-    DdManager *mgr = Cudd_Init(num_in, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+    DdManager *mgr =
+        Cudd_Init(num_in, 0, CUDD_UNIQUE_SLOTS * 8, CUDD_CACHE_SLOTS * 8, 32ull * 1024ull * 1024ull * 1024ull);
+    // Cudd_AutodynEnable(mgr, CUDD_REORDER_GENETIC);
     for (size_t i = 0; i < num_in; ++i) {
         varnames.push_back(fmt::format("i{}", i));
         const auto v = Cudd_bddIthVar(mgr, i);
@@ -58,7 +60,7 @@ int import_sop_pla(const std::string &in_path, const std::string &out_path) {
     for (const auto &vn : varnames) {
         varnames_cstr.push_back(vn.data());
     }
-    Cudd_DebugCheck(mgr);
+    // Cudd_DebugCheck(mgr);
 
     for (const auto &imp : sop.implicants()) {
         const auto bm    = imp.in_bmask();
@@ -92,14 +94,21 @@ int import_sop_pla(const std::string &in_path, const std::string &out_path) {
         Cudd_RecursiveDeref(mgr, out_node);
         out_node = tmp;
     }
-
-    const auto reduce_res = Cudd_ReduceHeap(mgr, CUDD_REORDER_SIFT, 0);
-    fmt::print("reduce_res: {}\n", reduce_res);
-    const auto reduce_res2 = Cudd_ReduceHeap(mgr, CUDD_REORDER_EXACT, 0);
-    fmt::print("reduce_res2: {}\n", reduce_res2);
+    // const auto reduce_res3 = Cudd_ReduceHeap(mgr, CUDD_REORDER_GENETIC, 0);
+    // fmt::print("reduce_res3: {}\n", reduce_res3);
+    // const auto reduce_res2 = Cudd_ReduceHeap(mgr, CUDD_REORDER_SIFT, 0);
+    // fmt::print("reduce_res2: {}\n", reduce_res2);
     Cudd_Ref(out_node);
     Cudd_RecursiveDeref(mgr, out_node);
-    Cudd_DebugCheck(mgr);
+    for (size_t i = 0; i < CUDD_REORDER_EXACT; ++i) {
+        const auto reduce_res = Cudd_ReduceHeap(mgr, static_cast<Cudd_ReorderingType>(i % CUDD_REORDER_EXACT), 0);
+        fmt::print("reduce_res: {}\n", reduce_res);
+        Cudd_Ref(out_node);
+        Cudd_RecursiveDeref(mgr, out_node);
+        // Cudd_DebugCheck(mgr);
+    }
+    Cudd_Ref(out_node);
+    Cudd_RecursiveDeref(mgr, out_node);
 
     Cudd_PrintInfo(mgr, stderr);
     const auto store_res =
