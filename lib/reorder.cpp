@@ -125,7 +125,7 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     fmt::print("sop # in: {} # out: {} # terms: {}\n", sop.in_sz(), sop.out_sz(), sop.implicants().size());
     for (size_t i = 0; i < num_in; ++i) {
         varnames.push_back(fmt::format("i{}", i));
-        const auto v = Cudd_bddIthVar(mgr, 0);
+        const auto v = Cudd_bddIthVar(mgr, i);
         if (!v) {
             std::terminate();
         }
