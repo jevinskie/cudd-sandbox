@@ -27,7 +27,7 @@ opt<Implicant> extr_implicant(std::string_view s) noexcept {
     }
 }
 
-opt<std::vector<std::string>> extr_ilb(std::string_view s) noexcept {
+static opt<std::vector<std::string>> extr_ilb(std::string_view s) noexcept {
     if (auto m = ctre::match<R"re(^\s*\.ilb\s+((?:\S+\s+)*\S+)\s*$)re">(s)) {
         std::vector<std::string> res;
         for (const auto label : ctre::split<R"re(\s+)re">(m.get<1>())) {
@@ -39,7 +39,7 @@ opt<std::vector<std::string>> extr_ilb(std::string_view s) noexcept {
     }
 }
 
-opt<std::vector<std::string>> extr_ob(std::string_view s) noexcept {
+static opt<std::vector<std::string>> extr_ob(std::string_view s) noexcept {
     if (auto m = ctre::match<R"re(^\s*\.ob\s+((?:\S+\s+)*\S+)\s*$)re">(s)) {
         std::vector<std::string> res;
         for (const auto label : ctre::split<R"re(\s+)re">(m.get<1>())) {
@@ -51,7 +51,7 @@ opt<std::vector<std::string>> extr_ob(std::string_view s) noexcept {
     }
 }
 
-opt<size_t> extr_p(std::string_view s) noexcept {
+static opt<size_t> extr_p(std::string_view s) noexcept {
     if (auto m = ctre::match<R"re(^\s*\.p\s+(\d+)\s*$)re">(s)) {
         const auto nsv      = m.get<1>().to_view();
         size_t n            = ~0;
@@ -65,7 +65,7 @@ opt<size_t> extr_p(std::string_view s) noexcept {
     }
 }
 
-bool extr_e(std::string_view s) noexcept {
+static bool extr_e(std::string_view s) noexcept {
     return ctre::match<R"re(^\s*\.e\s*$)re">(s);
 }
 
@@ -80,8 +80,11 @@ SOP read_pla_file(const std::string &pla_path) {
     opt<std::vector<std::string>> ob;
     opt<size_t> p;
     bool in_header = true;
+    int i          = 0;
     for (const auto &line : pla_str | std::ranges::views::split('\n')) {
         const std::string_view lsv{line};
+        ++i;
+        fmt::print(stderr, "line {}: '{}'\n", i, lsv);
         if (in_header) {
             if ((ilb = extr_ilb(lsv))) {
                 fmt::print("pla_ilb: {}\n", fmt::join(*ilb, " "));
