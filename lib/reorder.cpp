@@ -113,7 +113,7 @@ int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::st
 int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string &out_path) {
     std::string ip = in_path;
     std::string op = out_path;
-    Cudd_PrintInfo(mgr, stderr);
+    // Cudd_PrintInfo(mgr, stderr);
     const auto sop = read_pla_file(ip);
     std::vector<std::string> varnames;
     std::vector<const char *> varnames_cstr;
@@ -122,6 +122,8 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     const auto num_in = sop.in_sz();
     const auto one    = Cudd_ReadOne(mgr);
     const auto zero   = Cudd_ReadLogicZero(mgr);
+    Cudd_Ref(one);
+    Cudd_Ref(zero);
     fmt::print("sop # in: {} # out: {} # terms: {}\n", sop.in_sz(), sop.out_sz(), sop.implicants().size());
     for (size_t i = 0; i < num_in; ++i) {
         varnames.push_back(fmt::format("i{}", i));
@@ -129,41 +131,50 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
         if (!v) {
             std::terminate();
         }
-        Cudd_Ref(v);
         vars.push_back(v);
     }
     for (const auto &vn : varnames) {
         varnames_cstr.push_back(vn.data());
     }
-    Cudd_PrintDebug(mgr, one, num_in, 7);
 
+    Cudd_DebugCheck(mgr);
+    fmt::print(stderr, "BUILDING START\n");
     for (const auto &imp : sop.implicants()) {
-        const auto bm = imp.in_bmask();
-        const auto bp = imp.in_bpat();
-        DdNode *tmp   = one;
+        const auto bm    = imp.in_bmask();
+        const auto bp    = imp.in_bpat();
+        DdNode *imp_node = one;
         for (size_t i = 0; i < num_in; ++i) {
             const auto ibm = !!((bm >> i) & 1);
             if (!ibm) {
                 continue;
             }
             const auto ibp = !!((bp >> i) & 1);
-            tmp            = Cudd_bddIte(mgr, ibp ? vars[i] : Cudd_Not(vars[i]), tmp, zero);
+            DdNode *tmp    = Cudd_bddIte(mgr, ibp ? vars[i] : Cudd_Not(vars[i]), imp_node, zero);
             Cudd_Ref(tmp);
+            Cudd_RecursiveDeref(mgr, imp_node);
+            imp_node = tmp;
+            fmt::print(stderr, "BUILDING CHK B\n");
+            Cudd_DebugCheck(mgr);
         }
-        imps.push_back(tmp);
+        imps.push_back(imp_node);
     }
-    DdNode *out = zero;
+    fmt::print(stderr, "OUT CHK a\n");
+    Cudd_DebugCheck(mgr);
+    DdNode *out_node = zero;
     for (auto *imp : imps) {
-        out = Cudd_bddIte(mgr, imp, Cudd_ReadOne(mgr), out);
-        Cudd_Ref(out);
+        DdNode *tmp = Cudd_bddIte(mgr, imp, one, out_node);
+        Cudd_Ref(tmp);
+        Cudd_RecursiveDeref(mgr, out_node);
+        out_node = tmp;
     }
+    fmt::print(stderr, "BUILDING END\n");
 
     fprintf(stderr, "\n\n\n");
     Cudd_DebugCheck(mgr);
     Cudd_PrintInfo(mgr, stderr);
     const auto store_res =
-        Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), out, const_cast<char **>(varnames_cstr.data()), nullptr,
+        Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), out_node, const_cast<char **>(varnames_cstr.data()), nullptr,
                            DDDMP_MODE_TEXT, DDDMP_VARDEFAULT, op.data(), nullptr);
-    const auto print_res = Cudd_PrintDebug(mgr, out, num_in, 7);
+    Cudd_PrintDebug(mgr, out_node, num_in, 1);
     return store_res;
 }
