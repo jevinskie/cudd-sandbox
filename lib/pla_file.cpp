@@ -19,7 +19,7 @@
 
 template <typename T> using opt = std::optional<T>;
 
-opt<Implicant> extr_implicant(std::string_view s) noexcept {
+static opt<Implicant> extr_implicant(std::string_view s) noexcept {
     if (auto m = ctre::match<R"re(^\s*([01\-]+)\s+([01~]+)\s*$)re">(s)) {
         return Implicant(m.get<1>().to_view(), m.get<2>().to_view());
     } else {
@@ -86,21 +86,23 @@ SOP read_pla_file(const std::string &pla_path) {
         ++i;
         fmt::print(stderr, "line {}: '{}'\n", i, lsv);
         if (in_header) {
-            if ((ilb = extr_ilb(lsv))) {
-                fmt::print("pla_ilb: {}\n", fmt::join(*ilb, " "));
-            } else if ((ob = extr_ob(lsv))) {
-                fmt::print("pla_ob: {}\n", fmt::join(*ob, " "));
-            } else if ((p = extr_p(lsv))) {
-                fmt::print("pla_p: {}\n", *p);
+            if (!ilb && (ilb = extr_ilb(lsv))) {
+                // .ilb
+            } else if (!ob && (ob = extr_ob(lsv))) {
+                // .ob
+            } else if (!p && (p = extr_p(lsv))) {
+                // .p
                 in_header = false;
             }
         } else {
             if (const auto imp = extr_implicant(lsv)) {
                 pla.add_implicant(std::move(*imp));
             } else if (extr_e(lsv)) {
+                // .e
                 break;
             }
         }
     }
+    // TODO: return labels
     return pla;
 }

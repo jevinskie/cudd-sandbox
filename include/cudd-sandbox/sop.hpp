@@ -18,6 +18,8 @@ public:
         _in_bpat   = parse_bpat(in);
         _out_bmask = parse_bmask(out);
         _out_bpat  = parse_bpat(out);
+        _in_sz     = in.size();
+        _out_sz    = out.size();
     }
 
     size_t in_sz() const {
