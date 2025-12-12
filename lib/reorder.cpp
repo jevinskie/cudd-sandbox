@@ -97,6 +97,9 @@ int import_sop_pla(const std::string &in_path, const std::string &out_path) {
     fmt::print("reduce_res: {}\n", reduce_res);
     const auto reduce_res2 = Cudd_ReduceHeap(mgr, CUDD_REORDER_EXACT, 0);
     fmt::print("reduce_res2: {}\n", reduce_res2);
+    Cudd_Ref(out_node);
+    Cudd_RecursiveDeref(mgr, out_node);
+    Cudd_DebugCheck(mgr);
 
     Cudd_PrintInfo(mgr, stderr);
     const auto store_res =
