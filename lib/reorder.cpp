@@ -1,14 +1,15 @@
-#include "fmt/format.h"
 #include <cudd-sandbox/reorder.hpp>
 
 #include <cudd-sandbox/pla_file.hpp>
-#include <exception>
 
 #undef NDEBUG
 #include <cassert>
 
+#include <exception>
+
 #include <cudd.h>
 #include <dddmp.h>
+#include <fmt/format.h>
 
 int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::string &out_path) {
     std::string ip = in_path;
