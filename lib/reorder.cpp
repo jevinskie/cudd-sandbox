@@ -1,3 +1,4 @@
+#include "fmt/format.h"
 #include <cudd-sandbox/reorder.hpp>
 
 #include <cudd-sandbox/pla_file.hpp>
@@ -113,13 +114,21 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     std::string op = out_path;
     Cudd_PrintInfo(mgr, stderr);
     const auto sop = read_pla_file(ip);
+    std::vector<std::string> varnames;
+    std::vector<const char *> varnames_cstr;
+    const auto num_in = sop.in_sz();
+    for (size_t i = 0; i < num_in; ++i) {
+        varnames.push_back(fmt::format("i{}", i));
+    }
+    for (const auto &vn : varnames) {
+        varnames_cstr.push_back(vn.data());
+    }
 
     fprintf(stderr, "\n\n\n");
     Cudd_DebugCheck(mgr);
     Cudd_PrintInfo(mgr, stderr);
-    const char *varnames[] = {"a", "b", "c", "d"};
-    const auto store_res =
-        Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), Cudd_ReadLogicZero(mgr), const_cast<char **>(varnames),
-                           nullptr, DDDMP_MODE_TEXT, DDDMP_VARDEFAULT, op.data(), nullptr);
+    const auto store_res = Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), Cudd_ReadLogicZero(mgr),
+                                              const_cast<char **>(varnames_cstr.data()), nullptr, DDDMP_MODE_TEXT,
+                                              DDDMP_VARDEFAULT, op.data(), nullptr);
     return store_res;
 }
