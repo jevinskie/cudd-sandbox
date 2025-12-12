@@ -24,16 +24,10 @@ std::optional<Implicant> extr_implicant(std::string_view s) noexcept {
 }
 
 std::optional<std::vector<std::string>> extr_ilb(std::string_view s) noexcept {
-    if (auto m = ctre::match<R"re(^\s*\.ilb\s+((?<a>\S+)\s+)*(?<b>\S+)\s*$)re">(s)) {
-        const auto ilb_joined = m.get<2>().to_view();
-        fmt::print("0: '{}'\n1: '{}'\n2: '{}'\n3: '{}'\n", m.get<0>().to_view(), m.get<1>().to_view(),
-                   m.get<2>().to_view(), m.get<3>().to_view());
-        fmt::print("a: '{}'\nb: '{}'\n", m.get<"a">().to_view(), m.get<"b">().to_view());
-        fmt::print("ilb_joined: {}\n", ilb_joined);
+    if (auto m = ctre::match<R"re(^\s*\.ilb\s+((?:\S+\s+)*\S+)\s*$)re">(s)) {
         std::vector<std::string> res;
-        for (const auto ilbl : ctre::tokenize<R"re((\S+\s+|\S+)+)re">(m.get<1>())) {
-            fmt::print("ibl: {}\n", ilbl.get<0>().to_view());
-            res.push_back(ilbl.get<1>().to_string());
+        for (const auto ilbl : ctre::split<R"re(\s+)re">(m.get<1>())) {
+            res.push_back(ilbl.get<0>().to_string());
         }
         return res;
     } else {
