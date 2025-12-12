@@ -2,12 +2,14 @@
 
 #include <cudd-sandbox/utils.hpp>
 
-#include <cinttypes>
+#include <charconv>
+#include <cstddef>
 #include <exception>
 #include <optional>
 #include <ranges>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 #include <ctre.hpp>
@@ -15,7 +17,9 @@
 #include <fmt/ranges.h>
 #include <fmt/std.h>
 
-std::optional<Implicant> extr_implicant(std::string_view s) noexcept {
+template <typename T> using opt = std::optional<T>;
+
+opt<Implicant> extr_implicant(std::string_view s) noexcept {
     if (auto m = ctre::match<R"re(^\s*([01\-]+)\s+([01~]+)\s*$)re">(s)) {
         return Implicant(m.get<1>().to_view(), m.get<2>().to_view());
     } else {
@@ -23,16 +27,46 @@ std::optional<Implicant> extr_implicant(std::string_view s) noexcept {
     }
 }
 
-std::optional<std::vector<std::string>> extr_ilb(std::string_view s) noexcept {
+opt<std::vector<std::string>> extr_ilb(std::string_view s) noexcept {
     if (auto m = ctre::match<R"re(^\s*\.ilb\s+((?:\S+\s+)*\S+)\s*$)re">(s)) {
         std::vector<std::string> res;
-        for (const auto ilbl : ctre::split<R"re(\s+)re">(m.get<1>())) {
-            res.push_back(ilbl.get<0>().to_string());
+        for (const auto label : ctre::split<R"re(\s+)re">(m.get<1>())) {
+            res.push_back(label.get<0>().to_string());
         }
         return res;
     } else {
         return std::nullopt;
     }
+}
+
+opt<std::vector<std::string>> extr_ob(std::string_view s) noexcept {
+    if (auto m = ctre::match<R"re(^\s*\.ob\s+((?:\S+\s+)*\S+)\s*$)re">(s)) {
+        std::vector<std::string> res;
+        for (const auto label : ctre::split<R"re(\s+)re">(m.get<1>())) {
+            res.push_back(label.get<0>().to_string());
+        }
+        return res;
+    } else {
+        return std::nullopt;
+    }
+}
+
+opt<size_t> extr_p(std::string_view s) noexcept {
+    if (auto m = ctre::match<R"re(^\s*\.p\s+(\d+)\s*$)re">(s)) {
+        const auto nsv      = m.get<1>().to_view();
+        size_t n            = ~0;
+        const auto conv_res = std::from_chars<size_t>(nsv.cbegin(), nsv.cend(), n, 10);
+        if (conv_res.ec != std::errc{}) {
+            return ~0;
+        }
+        return n;
+    } else {
+        return std::nullopt;
+    }
+}
+
+bool extr_e(std::string_view s) noexcept {
+    return ctre::match<R"re(^\s*\.e\s*$)re">(s);
 }
 
 SOP read_pla_file(const std::string &pla_path) {
@@ -42,20 +76,26 @@ SOP read_pla_file(const std::string &pla_path) {
         fprintf(stderr, "pla file read error\n");
         std::terminate();
     }
+    opt<std::vector<std::string>> ilb;
+    opt<std::vector<std::string>> ob;
+    opt<size_t> p;
     bool in_header = true;
-    int i          = 0;
     for (const auto &line : pla_str | std::ranges::views::split('\n')) {
-        ++i;
-        printf("pla[%5d]_i: %.*s\n", i, static_cast<int>(line.size()), line.data());
+        const std::string_view lsv{line};
         if (in_header) {
-            if (const auto ilb = extr_ilb(std::string_view(line))) {
-                fmt::print("pla[{:5d}]_ilb: {}\n", i, fmt::join(*ilb, " "));
+            if ((ilb = extr_ilb(lsv))) {
+                fmt::print("pla_ilb: {}\n", fmt::join(*ilb, " "));
+            } else if ((ob = extr_ob(lsv))) {
+                fmt::print("pla_ob: {}\n", fmt::join(*ob, " "));
+            } else if ((p = extr_p(lsv))) {
+                fmt::print("pla_p: {}\n", *p);
+                in_header = false;
             }
         } else {
-            if (const auto imp = extr_implicant(std::string_view(line))) {
-                // printf("pla[%5d]_o: ibm: 0x%08" PRIx64 " ibp: 0x%08" PRIx64 " obm: 0x%08" PRIx64 " obp: 0x%08" PRIx64
-                //         "\n", i, imp->in_bmask(), imp->in_bpat(), imp->out_bmask(), imp->out_bpat());
-                printf("pla[%5d]_o: b[m,p]: 0x%08" PRIx64 ", 0x%08" PRIx64 "\n", i, imp->in_bmask(), imp->in_bpat());
+            if (const auto imp = extr_implicant(lsv)) {
+                pla.add_implicant(std::move(*imp));
+            } else if (extr_e(lsv)) {
+                break;
             }
         }
     }
