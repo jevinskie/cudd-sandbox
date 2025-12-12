@@ -120,6 +120,8 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     std::vector<DdNode *> vars;
     std::vector<DdNode *> imps;
     const auto num_in = sop.in_sz();
+    const auto one    = Cudd_ReadOne(mgr);
+    const auto zero   = Cudd_ReadLogicZero(mgr);
     fmt::print("sop # in: {} # out: {} # terms: {}\n", sop.in_sz(), sop.out_sz(), sop.implicants().size());
     for (size_t i = 0; i < num_in; ++i) {
         varnames.push_back(fmt::format("i{}", i));
@@ -133,23 +135,24 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     for (const auto &vn : varnames) {
         varnames_cstr.push_back(vn.data());
     }
+    Cudd_PrintDebug(mgr, one, num_in, 7);
 
     for (const auto &imp : sop.implicants()) {
         const auto bm = imp.in_bmask();
         const auto bp = imp.in_bpat();
-        DdNode *tmp   = Cudd_ReadOne(mgr);
+        DdNode *tmp   = one;
         for (size_t i = 0; i < num_in; ++i) {
             const auto ibm = !!((bm >> i) & 1);
             if (!ibm) {
                 continue;
             }
             const auto ibp = !!((bp >> i) & 1);
-            tmp            = Cudd_bddIte(mgr, ibp ? vars[i] : Cudd_Not(vars[i]), tmp, Cudd_ReadLogicZero(mgr));
+            tmp            = Cudd_bddIte(mgr, ibp ? vars[i] : Cudd_Not(vars[i]), tmp, zero);
             Cudd_Ref(tmp);
         }
         imps.push_back(tmp);
     }
-    DdNode *out = Cudd_ReadLogicZero(mgr);
+    DdNode *out = zero;
     for (auto *imp : imps) {
         out = Cudd_bddIte(mgr, imp, Cudd_ReadOne(mgr), out);
         Cudd_Ref(out);
@@ -161,5 +164,6 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     const auto store_res =
         Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), out, const_cast<char **>(varnames_cstr.data()), nullptr,
                            DDDMP_MODE_TEXT, DDDMP_VARDEFAULT, op.data(), nullptr);
+    const auto print_res = Cudd_PrintDebug(mgr, out, num_in, 7);
     return store_res;
 }
