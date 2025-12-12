@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
         DdManager *mgr         = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
         const auto reorder_res = reorder_dddmp_file(mgr, *in_path, *out_path);
         fmt::print("result: {}\n", reorder_res);
+        Cudd_Quit(mgr);
     } else if (pla_cmd) {
         if (!in_path) {
             fmt::print(stderr, "pla: need --in path\n");
@@ -36,6 +37,7 @@ int main(int argc, char **argv) {
         DdManager *mgr         = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
         const auto sop_pla_res = import_sop_pla(mgr, *in_path, *out_path);
         fmt::print("import_sop_pla returned: {}\n", sop_pla_res);
+        Cudd_Quit(mgr);
     }
     return 0;
 }

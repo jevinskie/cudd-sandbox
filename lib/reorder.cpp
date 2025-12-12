@@ -132,6 +132,22 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
         varnames_cstr.push_back(vn.data());
     }
 
+    for (const auto &imp : sop.implicants()) {
+        const auto bm = imp.in_bmask();
+        const auto bp = imp.in_bpat();
+        DdNode *tmp   = nullptr;
+        for (size_t i = 0; i < num_in; ++i) {
+            const auto ibm = !!((bm >> i) & 1);
+            if (!ibm) {
+                continue;
+            }
+            const auto ibp = !!((bp >> i) & 1);
+            DdNode *t      = nullptr;
+            DdNode *e      = nullptr;
+            tmp            = Cudd_bddIte(mgr, ibp ? vars[i] : Cudd_Not(vars[i]), t, e);
+        }
+    }
+
     fprintf(stderr, "\n\n\n");
     Cudd_DebugCheck(mgr);
     Cudd_PrintInfo(mgr, stderr);
