@@ -120,11 +120,6 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     std::vector<DdNode *> vars;
     std::vector<DdNode *> imps;
     const auto num_in = sop.in_sz();
-    const auto one    = Cudd_ReadOne(mgr);
-    const auto zero   = Cudd_ReadLogicZero(mgr);
-    Cudd_Ref(one);
-    Cudd_Ref(zero);
-    fmt::print("one: {} zero: {}\n", fmt::ptr(one), fmt::ptr(zero));
     fmt::print("sop # in: {} # out: {} # terms: {}\n", sop.in_sz(), sop.out_sz(), sop.implicants().size());
     for (size_t i = 0; i < num_in; ++i) {
         varnames.push_back(fmt::format("i{}", i));
@@ -144,29 +139,29 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     for (const auto &imp : sop.implicants()) {
         const auto bm    = imp.in_bmask();
         const auto bp    = imp.in_bpat();
-        DdNode *imp_node = one;
+        DdNode *imp_node = Cudd_ReadOne(mgr);
+        Cudd_Ref(imp_node);
         for (size_t i = 0; i < num_in; ++i) {
             const auto ibm = !!((bm >> i) & 1);
             if (!ibm) {
                 continue;
             }
             const auto ibp = !!((bp >> i) & 1);
+            DdNode *zero   = Cudd_ReadLogicZero(mgr);
+            Cudd_Ref(zero);
             DdNode *tmp =
                 Cudd_bddIte(mgr, ibp ? Cudd_bddIthVar(mgr, i) : Cudd_Not(Cudd_bddIthVar(mgr, i)), imp_node, zero);
             Cudd_Ref(tmp);
-            fmt::print("i: {} j: {} tmp: {} imp_node: {}\n", i, j, fmt::ptr(tmp), fmt::ptr(imp_node));
             Cudd_RecursiveDeref(mgr, imp_node);
             imp_node = tmp;
-            fmt::print(stderr, "BUILDING CHK B\n");
-            Cudd_DebugCheck(mgr);
         }
         imps.push_back(imp_node);
-        ++j;
     }
-    fmt::print(stderr, "OUT CHK a\n");
-    Cudd_DebugCheck(mgr);
-    DdNode *out_node = zero;
+    DdNode *out_node = Cudd_ReadLogicZero(mgr);
+    Cudd_Ref(out_node);
     for (auto *imp : imps) {
+        DdNode *one = Cudd_ReadOne(mgr);
+        Cudd_Ref(one);
         DdNode *tmp = Cudd_bddIte(mgr, imp, one, out_node);
         Cudd_Ref(tmp);
         Cudd_RecursiveDeref(mgr, out_node);
