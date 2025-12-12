@@ -80,11 +80,8 @@ SOP read_pla_file(const std::string &pla_path) {
     opt<std::vector<std::string>> ob;
     opt<size_t> p;
     bool in_header = true;
-    int i          = 0;
     for (const auto &line : pla_str | std::ranges::views::split('\n')) {
         const std::string_view lsv{line};
-        ++i;
-        fmt::print(stderr, "line {}: '{}'\n", i, lsv);
         if (in_header) {
             if (!ilb && (ilb = extr_ilb(lsv))) {
                 // .ilb

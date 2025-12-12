@@ -20,16 +20,22 @@ int main(int argc, char **argv) {
             return 1;
         }
         fmt::print("reordering {:s} into {:s}\n", *in_path, *out_path);
-        DdManager *mgr        = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
-        const int reorder_res = reorder_dddmp_file(mgr, *in_path, *out_path);
+        DdManager *mgr         = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+        const auto reorder_res = reorder_dddmp_file(mgr, *in_path, *out_path);
         fmt::print("result: {}\n", reorder_res);
     } else if (pla_cmd) {
         if (!in_path) {
             fmt::print(stderr, "pla: need --in path\n");
             return 1;
         }
+        if (!out_path) {
+            fmt::print(stderr, "pla: need --out path\n");
+            return 1;
+        }
         fmt::print("pla reading {:s} into {:s}\n", *in_path, *out_path);
-        read_pla_file(*in_path);
+        DdManager *mgr         = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+        const auto sop_pla_res = import_sop_pla(mgr, *in_path, *out_path);
+        fmt::print("import_sop_pla returned: {}\n", sop_pla_res);
     }
     return 0;
 }

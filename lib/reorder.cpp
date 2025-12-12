@@ -1,5 +1,7 @@
 #include <cudd-sandbox/reorder.hpp>
 
+#include <cudd-sandbox/pla_file.hpp>
+
 #undef NDEBUG
 #include <cassert>
 
@@ -104,4 +106,20 @@ int reorder_dddmp_file(DdManager *mgr, const std::string &in_path, const std::st
     // const auto dbgr = Dddmp_cuddBddDisplayBinary(ip.data(), op.data());
     // fprintf(stderr, "dbgr: %d\n", dbgr);
     // return dbgr;
+}
+
+int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string &out_path) {
+    std::string ip = in_path;
+    std::string op = out_path;
+    Cudd_PrintInfo(mgr, stderr);
+    const auto sop = read_pla_file(ip);
+
+    fprintf(stderr, "\n\n\n");
+    Cudd_DebugCheck(mgr);
+    Cudd_PrintInfo(mgr, stderr);
+    const char *varnames[] = {"a", "b", "c", "d"};
+    const auto store_res =
+        Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), Cudd_ReadLogicZero(mgr), const_cast<char **>(varnames),
+                           nullptr, DDDMP_MODE_TEXT, DDDMP_VARDEFAULT, op.data(), nullptr);
+    return store_res;
 }
