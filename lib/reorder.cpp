@@ -118,6 +118,7 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     std::vector<std::string> varnames;
     std::vector<const char *> varnames_cstr;
     std::vector<DdNode *> vars;
+    std::vector<DdNode *> imps;
     const auto num_in = sop.in_sz();
     fmt::print("sop # in: {} # out: {} # terms: {}\n", sop.in_sz(), sop.out_sz(), sop.implicants().size());
     for (size_t i = 0; i < num_in; ++i) {
@@ -127,6 +128,7 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
             std::terminate();
         }
         Cudd_Ref(v);
+        vars.push_back(v);
     }
     for (const auto &vn : varnames) {
         varnames_cstr.push_back(vn.data());
@@ -135,24 +137,29 @@ int import_sop_pla(DdManager *mgr, const std::string &in_path, const std::string
     for (const auto &imp : sop.implicants()) {
         const auto bm = imp.in_bmask();
         const auto bp = imp.in_bpat();
-        DdNode *tmp   = nullptr;
+        DdNode *tmp   = Cudd_ReadOne(mgr);
         for (size_t i = 0; i < num_in; ++i) {
             const auto ibm = !!((bm >> i) & 1);
             if (!ibm) {
                 continue;
             }
             const auto ibp = !!((bp >> i) & 1);
-            DdNode *t      = nullptr;
-            DdNode *e      = nullptr;
-            tmp            = Cudd_bddIte(mgr, ibp ? vars[i] : Cudd_Not(vars[i]), t, e);
+            tmp            = Cudd_bddIte(mgr, ibp ? vars[i] : Cudd_Not(vars[i]), tmp, Cudd_ReadLogicZero(mgr));
+            Cudd_Ref(tmp);
         }
+        imps.push_back(tmp);
+    }
+    DdNode *out = Cudd_ReadLogicZero(mgr);
+    for (auto *imp : imps) {
+        out = Cudd_bddIte(mgr, imp, Cudd_ReadOne(mgr), out);
+        Cudd_Ref(out);
     }
 
     fprintf(stderr, "\n\n\n");
     Cudd_DebugCheck(mgr);
     Cudd_PrintInfo(mgr, stderr);
-    const auto store_res = Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), Cudd_ReadLogicZero(mgr),
-                                              const_cast<char **>(varnames_cstr.data()), nullptr, DDDMP_MODE_TEXT,
-                                              DDDMP_VARDEFAULT, op.data(), nullptr);
+    const auto store_res =
+        Dddmp_cuddBddStore(mgr, const_cast<char *>("opt"), out, const_cast<char **>(varnames_cstr.data()), nullptr,
+                           DDDMP_MODE_TEXT, DDDMP_VARDEFAULT, op.data(), nullptr);
     return store_res;
 }
