@@ -1,6 +1,7 @@
 [submodule "3rdparty/cudd"]
 	path = 3rdparty/cudd
-	url = https://github.com/ssoelvsten/cudd
+	url = https://github.com/jevinskie/cudd
+	branch = jev/main
 [submodule "3rdparty/fmt"]
 	path = 3rdparty/fmt
 	url = https://github.com/fmtlib/fmt
